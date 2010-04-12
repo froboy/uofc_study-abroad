@@ -1,0 +1,719 @@
+<?php
+// $Id$
+
+function uofc_study-abroad_user($op, &$edit, &$account, $category) {
+	switch($op) {
+		case 'login':
+			drupal_goto('node/add');
+			break;
+	}
+}
+
+/**
+ * Implementation of hook_views_api().
+ */
+function uofc_study-abroad_views_api() {
+  return array(
+    'api' => 2,
+    //'path' => drupal_get_path('module', 'uofc_study-abroad'),
+    'path' => drupal_get_path('module', 'uofc_study-abroad') . '/includes',
+  );
+}
+
+/**
+ * Implementation of hook_form_alter
+ */
+function uofc_study-abroad_form_alter(&$form, $form_state, $form_id) {
+	//dpm($form);
+	switch($form_id) {
+		case 'slideshow_node_form':
+		case 'story_node_form':
+		case 'video_node_form':
+		case 'college_now_news_node_form':
+			_uofc_study-abroad_form_alter_feature_node_form($form, $form_id);
+			break;
+		case 'contact_mail_page':
+			_uofc_study-abroad_form_alter_contact_form($form, $form_id);
+	}
+}
+
+/**
+ * Implemenation of hook_imagecache_default_presets
+ *
+ */
+function uofc_study-abroad_imagecache_default_presets() {
+	$presets = array();
+	$presets['archive_image'] = array (
+	  'presetname' => 'archive_image',
+	  'actions' => 
+	  array (
+	    0 => 
+	    array (
+	      'weight' => '0',
+	      'module' => 'imagecache',
+	      'action' => 'imagecache_resize',
+	      'data' => 
+	      array (
+	        'width' => '137',
+	        'height' => '58',
+	      ),
+	    ),
+	  ),
+	);
+	$presets['frontpage'] = array (
+	  'presetname' => 'frontpage',
+	  'actions' => 
+	  array (
+	    0 => 
+	    array (
+	      'weight' => '0',
+	      'module' => 'imagecache',
+	      'action' => 'imagecache_crop',
+	      'data' => 
+	      array (
+	        'width' => '433',
+	        'height' => '183',
+	        'xoffset' => 'left',
+	        'yoffset' => 'top',
+	      ),
+	    ),
+	  ),
+	);
+	$presets['link_package'] = array (
+	  'presetname' => 'link_package',
+	  'actions' => 
+	  array (
+	    0 => 
+	    array (
+	      'weight' => '0',
+	      'module' => 'imagecache',
+	      'action' => 'imagecache_crop',
+	      'data' => 
+	      array (
+	        'width' => '92',
+	        'height' => '59',
+	        'xoffset' => 'left',
+	        'yoffset' => 'top',
+	      ),
+	    ),
+	  ),
+	);
+	
+	return $presets;
+}
+
+/**
+ * Implmentation of hook_block().
+ *
+ * @param string $op
+ * @param string $delta
+ * @param array $edit
+ * @return array
+ */
+function uofc_study-abroad_block($op = 'list', $delta = 0, $edit = array()) {
+	if ($op == 'list') {
+	    $blocks['takeaction_meetAdviser'] = 	array ('info' => t('Take Action: Meet the Adviser'));
+	    $blocks['takeaction_discoverChicago'] = array ('info' => t('Take Action: Discover Chicago'));
+	    $blocks['takeaction_studyAbroad'] = 	array ('info' => t('Take Action: Study Abroad'));
+	    $blocks['takeaction_planCareer'] = 		array ('info' => t('Take Action: Plan Your Career'));
+	    $blocks['takeaction_makeMind'] = 		array ('info' => t('Take Action: Make up your Mind'));
+	    $blocks['takeaction_pastArticles'] = 	array ('info' => t('Take Action: Read past Articles'));
+	    $blocks['takeaction_suggestPublication'] = array ('info' => t('Take Action: Suggest a Publication'));
+	    $blocks['takeaction_discoverSources'] = array ('info' => t('Take Action: Discover our Sources'));
+	    $blocks['takeaction_getonAction'] = 	array ('info' => t('Take Action: Get in on the Action'));
+	    $blocks['takeaction_checkoutFeatures'] = array ('info' => t('Take Action: Check out other Features'));
+	    $blocks['takeaction_sgneedsYou'] = 		array ('info' => t('Take Action: SG needs You'));
+	    $blocks['takeaction_ombudsperson'] = 	array ('info' => t('Take Action: Meet the OMBUDSPERSON'));
+	    $blocks['takeaction_nonfiction'] = 		array ('info' => t('Take Action: Indulge in Non-Fiction'));
+	    $blocks['takeaction_getstudyOn'] = 		array ('info' => t('Take Action: Get your Study On'));
+	    $blocks['takeaction_satisfyCore'] = 	array ('info' => t('Take Action: Satisfy your Core'));
+	    $blocks['takeaction_mapDegree'] = 		array ('info' => t('Take Action: Map out your Degree'));
+	    $blocks['takeaction_howMuch'] = 		array ('info' => t('Take Action: I owe how much?'));
+	    $blocks['takeaction_makeCase'] = 		array ('info' => t('Take Action: Make a case to the Dean'));
+	    $blocks['takeaction_onTime'] = 			array ('info' => t('Take Action: Make it to class On Time'));
+	    $blocks['takeaction_getTogether'] =		array ('info' => t('Take Action: Get it Together'));
+	    $blocks['takeaction_findSomebody'] =	array ('info' => t('Take Action: Find Somebody'));
+	    $blocks['takeaction_beginJourney'] =	array ('info' => t('Take Action: Begin your Journey'));
+	    $blocks['takeaction_checkCalendar'] =	array ('info' => t('Take Action: Check your Calendar'));
+	    $blocks['takeaction_gradSchool'] =		array ('info' => t('Take Action: Go to Grad School'));
+	    $blocks['takeaction_inShape'] =			array ('info' => t('Take Action: Keep yourself in Shape'));
+	    $blocks['takeaction_plansSummer'] =		array ('info' => t('Take Action: Make plans for Summer'));
+	    $blocks['takeaction_transcript'] =		array ('info' => t('Take Action: Get your Transcript'));
+	    $blocks['takeaction_ferpaForm'] =		array ('info' => t('Take Action: Update your FERPA form'));
+	    $blocks['takeaction_researchWorld'] =	array ('info' => t('Take Action: Research your World'));
+	    $blocks['takeaction_jointDegree'] =		array ('info' => t('Take Action: Begin a Joint Degree'));
+	    
+	    // other non-take action blocks
+		$blocks['college_features'] = array(
+			'info' => t('College Features'),
+		);
+		$blocks['college_now'] = array(
+			'info' => t('College Now'),
+		);
+		$blocks['filter_feature_type'] = array(
+			'info' => t('Archives Filter Options'),
+		);
+		$blocks['browse_features'] = array(
+			'info' => t('Browse Features'),
+		);
+		$blocks['planning_future'] = array(
+			'info' => t('Planning for Your Future'),
+		);
+		$blocks['planning_future_related_links'] = array(
+			'info' => t('Planning for Your Future - Related Links'),
+		);
+	}
+	elseif ($op == 'view') {
+		switch($delta) {
+			case 'takeaction_meetAdviser':
+			case 'takeaction_discoverChicago':
+			case 'takeaction_studyAbroad':
+			case 'takeaction_planCareer':
+			case 'takeaction_makeMind':
+			case 'takeaction_pastArticles':
+			case 'takeaction_suggestPublication':
+			case 'takeaction_discoverSources':
+			case 'takeaction_getonAction':
+			case 'takeaction_checkoutFeatures':
+			case 'takeaction_sgneedsYou':
+			case 'takeaction_ombudsperson':
+			case 'takeaction_nonfiction':
+			case 'takeaction_getstudyOn':
+			case 'takeaction_satisfyCore':
+			case 'takeaction_mapDegree':
+			case 'takeaction_howMuch':
+			case 'takeaction_makeCase':
+			case 'takeaction_onTime':
+			case 'takeaction_getTogether':
+			case 'takeaction_findSomebody':
+			case 'takeaction_beginJourney':
+			case 'takeaction_checkCalendar':
+			case 'takeaction_gradSchool':
+			case 'takeaction_inShape':
+			case 'takeaction_plansSummer':
+			case 'takeaction_transcript':
+			case 'takeaction_ferpaForm':
+			case 'takeaction_researchWorld':
+			case 'takeaction_jointDegree':
+				$blocks = array(
+					'subject' => '',
+		        	'content' => _uofc_study-abroad_takeaction_content($delta),
+				);
+				break;
+			case 'college_features':
+				$blocks = array(
+					'subject' => t('College Features'),
+					'content' => _uofc_study-abroad_college_features_content(),
+				);
+				break;
+			case 'college_now':
+				$blocks = array(
+					'subject' => t('College Now'),
+					'content' => _uofc_study-abroad_college_now_content(),
+				);
+				break;
+			case 'filter_feature_type':
+				$blocks = array(
+	                'subject' => t('Filter By'),
+	                'content' => _uofc_study-abroad_filter_feature_type_content(),
+	        	);
+	        	break;
+	        case 'browse_features':
+				$blocks = array(
+	                'subject' => t('Browse Features'),
+	                'content' => _uofc_study-abroad_browse_features_content(),
+	        	);
+	        	break;
+	        case 'planning_future':
+				$blocks = array(
+	                'subject' => t('What Do You Want To Do?'),
+	                'content' => _uofc_study-abroad_planning_future_content(),
+	        	);
+	        	break;
+	        case 'planning_future_related_links':
+	        	$blocks = array(
+	        		'subject' => t('Related Links'),
+	        		'content' => _uofc_study-abroad_planning_future_related_links_content(),
+	        	);
+		}
+	}
+	
+	return $blocks;
+}
+
+function _uofc_study-abroad_takeaction_content($delta) {
+	$theme_path = base_path() . drupal_get_path('theme', 'alice');
+	
+	//set content inside blocks
+	switch($delta) {
+		case 'takeaction_meetAdviser':
+			$title_img_src = $theme_path . '/img/takeaction/adviser_appointment.png';
+			$title = t('Meet the Advisors');
+			$img = $theme_path . '/img/takeaction/adviser_appointment.jpg';
+			$content = array(
+				'p1' => t('Make an appointment ') .  l('with your adviser', 'about-college/college-directory') . t(' at the reception desk (Harper, 2nd Floor) or by calling 773-702-8615. You can reach the Adviser-on Call for urgent issues at this number too.'),
+			);
+			break;
+		case 'takeaction_discoverChicago':
+			$title_img_src = $theme_path . '/img/takeaction/chicago_studies.png';
+			$title = t('Discover Chicago');
+			$img = $theme_path . '/img/takeaction/chicago_studies.jpg';
+			$content = array(
+				'p1' => t('The Chicago Studies site will connect you to the city in a whole new way.'),
+				'p2' => l('Study, engage, and discover the city of Chicago', 'http://chicagostudies.uchicago.edu/'),
+			);
+			break;
+		case 'takeaction_studyAbroad':
+			$title_img_src = $theme_path . '/img/takeaction/study_abroad.png';
+			$title = t('Time to Study Abroad');
+			$img = $theme_path . '/img/takeaction/study_abroad.jpg';
+			$content = array(
+				'p1' => t('Explore the world, discover yourself. Dozens of programs, infinite possibilities.'),
+				'p2' => l('Check out the programs', 'http://study-abroad.uchicago.edu/'),
+			);			
+			break;
+		case 'takeaction_planCareer':
+			$title_img_src = $theme_path . '/img/takeaction/caps.png';
+			$title = t('Plan your Career');
+			$img = $theme_path . '/img/takeaction/caps.jpg';
+			$content = array(
+				'p1' => t('The CAPS site has a ton of advice no matter what opportunity you\'re looking for.'),
+				'p2' => l('Prepare yourself', 'http://caps.uchicago.edu/'),
+			);
+			break;
+		case 'takeaction_makeMind':
+			$title_img_src = $theme_path . '/img/takeaction/course_selection.png';
+			$title = t('Make up your Mind');
+			$img = $theme_path . '/img/takeaction/course_selection.jpg';
+			$links = array(
+				l('College Catalog', 'http://collegecatalog.uchicago.edu/programs'),
+				l('Evaluations', 'http://evaluations.uchicago.edu/'),
+				l('Time Schedules', 'http://timeschedules.uchicago.edu/'),
+				l('Course Registration & Add/Drop', 'https://college-registration.uchicago.edu/'),
+				l('Grad & Prof. School Registration information', 'academics-advising/course-selection-registration/graduate-and-professional-school-courses'),
+				l('Examination and Transfer Credit', 'policies-regulations/course-registration-policies/transfer-credit'),
+			);
+			$content = array(
+				'p1' => t('Some choices are easier than others. Consult these sites to help you decide:') . theme('item_list', $links, '', 'ul', array('class' => 'takeaction_list')),
+			);
+			break;
+		case 'takeaction_pastArticles':
+			$title_img_src = $theme_path . '/img/takeaction/college_now_archives.png';
+			$title = t('Read past Articles');
+			$img = $theme_path . '/img/takeaction/college_now_archives.jpg';
+			$content = array(
+				'p1' => t('Delve into our past news and blog items'),
+				'p2' => l('Visit the Chicago Now Archives', 'news'),
+			);
+			break;
+		case 'takeaction_suggestPublication':
+			$title_img_src = $theme_path . '/img/takeaction/suggest_publication.png';
+			$title = t('Suggest a Publication');
+			$img = $theme_path . '/img/takeaction/suggest_publication.jpg';
+			$content = array(
+				'p1' => t('Have a news or blog suggestion?'),
+				'p2' => l('Let us know!', 'suggest-publication'),
+			);
+			break;
+		case 'takeaction_discoverSources':
+			$title_img_src = $theme_path . '/img/takeaction/about_college_now.png';
+			$title = t('Discover our Sources');
+			$img = $theme_path . '/img/takeaction/about_college_now.jpg';
+			$content = array(
+				'p1' => t('Want to know what sources are used to create our College Now feature?'),
+				'p2' => l('Visit our About College Now page', 'news'),
+			);
+			break;
+		case 'takeaction_getonAction':
+			$title_img_src = $theme_path . '/img/takeaction/submit_feature.png';
+			$title = t('Get in on the Action');
+			$img = $theme_path . '/img/takeaction/submit_feature.jpg';
+			$content = array(
+				'p1' => t('Show off your writing, photographic, or video ability, while covering a campus event or issue.'),
+				'p2' => l('Submit a feature article', 'submit-feature'),
+			);
+			break;
+		case 'takeaction_checkoutFeatures':
+			$title_img_src = $theme_path . '/img/takeaction/feature_archives.png';
+			$title = t('Check our other Features');
+			$img = $theme_path . '/img/takeaction/feature_archives.jpg';
+			$content = array(
+				'p1' => t('Look around in our ever growing archive of feature stories.'),
+				'p2' => l('Take me to the Feature Archives', 'archives'),
+			);
+			break;
+		case 'takeaction_sgneedsYou':
+			$title_img_src = $theme_path . '/img/takeaction/student_government.png';
+			$title = t('SG needs You');
+			$img = $theme_path . '/img/takeaction/student_government.jpg';
+			$content = array(
+				'p1' => t('Student Government offers lots of ways to get involved in the affairs of your classmates. Official issues and concerns, we mean.'),
+				'p2' => l('Let your voice ring out!', 'http://sg.uchicago.edu/'),
+			);
+			break;
+		case 'takeaction_ombudsperson':
+			$title_img_src = $theme_path . '/img/takeaction/ombudsperson.png';
+			$title = t('Meet the OMBUDSPERSON');
+			$img = $theme_path . '/img/takeaction/ombudsperson.jpg';
+			$content = array(
+				'p1' => t('Your ombudsperson may be able help you with a policy problem when other avenues have been exhausted.'),
+				'p2' => l('Satisfy your sense of justice', 'http://ombudsperson.uchicago.edu/'),
+			);
+			break;
+		case 'takeaction_nonfiction':
+			$title_img_src = $theme_path . '/img/takeaction/vare_writer.png';
+			$title = t('Indulge in Non-Fiction');
+			$img = $theme_path . '/img/takeaction/vare_writer.jpg';
+			$content = array(
+				'p1' => t('Each year the College hosts a non-fiction writer as our Vare Writer in Residence.'),
+				'p2' => l('See who\'s coming this year', 'http://varewir.uchicago.edu/'),
+			);
+			break;
+		case 'takeaction_getstudyOn':
+			$title_img_src = $theme_path . '/img/takeaction/finals.png';
+			$title = t('Get your Study On');
+			$img = $theme_path . '/img/takeaction/finals.jpg';
+			$content = array(
+				'p1' => t('Find out when (and where!) your finals are.'),
+				'p2' => l('Check the Registrar\'s exam schedule', 'http://registrar.uchicago.edu/courses/final-exams.shtml'),
+			);
+			break;
+		case 'takeaction_satisfyCore':
+			$title_img_src = $theme_path . '/img/takeaction/core_courses.png';
+			$title = t('Satisfy your Core');
+			$img = $theme_path . '/img/takeaction/core_courses.jpg';
+			$content = array(
+				'p1' => t('The Curriculum section of the catalog details the courses you can take to fulfill your general education requirements.'),
+				'p2' => l('Check out the possibilities (pdf)', 'http://collegecatalog.uchicago.edu/pdf_10/Curr.pdf'),
+			);
+			break;
+		case 'takeaction_mapDegree':
+			$title_img_src = $theme_path . '/img/takeaction/degree_worksheet.png';
+			$title = t('Map out your Degree');
+			$img = $theme_path . '/img/takeaction/degree_worksheet.jpg';
+			$content = array(
+				'p1' => t('The Degree Program Worksheet helps you figure out what you need to take and where it fits in to your academic studies.'),
+				'p2' => l('Download the Degree Program Worksheet (pdf)', 'http://collegecatalog.uchicago.edu/pdf_10/DegWksht.pdf'),
+			);
+			break;
+		case 'takeaction_howMuch':
+			$title_img_src = $theme_path . '/img/takeaction/tuition.png';
+			$title = t('I owe how much?');
+			$img = $theme_path . '/img/takeaction/tuition.jpg';
+			$content = array(
+				'p1' => t('Visit the Bursar\'s office tuition page for the current information on the cost of your education.'),
+				'p2' => l('Take me to your Bursar', 'http://bursar.uchicago.edu/tuition.html'),
+			);
+			break;
+		case 'takeaction_makeCase':
+			$title_img_src = $theme_path . '/img/takeaction/petition.png';
+			$title = t('Make a case to the Dean');
+			$img = $theme_path . '/img/takeaction/petition.jpg';
+			$content = array(
+				'p1' => t('You\'ll need to fill out this form if you want to take a fifth class, request transfer credit, take a course in the graduate divisions, etc.'),
+				'p2' => l('Get the General Petition Form (pdf)', 'http://www.college.uchicago.edu/academics/pdf/general_petition.pdf'),
+			);
+			break;
+		case 'takeaction_onTime':
+			$title_img_src = $theme_path . '/img/takeaction/time_schedules.png';
+			$title = t('Make it to class On Time');
+			$img = $theme_path . '/img/takeaction/time_schedules.jpg';
+			$content = array(
+				'p1' => t('Things change, classes sections are added, new courses are offered.'),
+				'p2' => l('Keep up to date', 'http://timeschedules.uchicago.edu/'),
+			);
+			break;
+		case 'takeaction_getTogether':
+			$title_img_src = $theme_path . '/img/takeaction/portal.png';
+			$title = t('Get it Together');
+			$img = $theme_path . '/img/takeaction/portal.jpg';
+			$content = array(
+				'p1' => t('Checking grades? Paying bills? Reading feeds? Yup, the portal can do that.'),
+				'p2' => l('Log in to my.uchicago now', 'http://my.uchicago.edu/'),
+			);
+			break;
+		case 'takeaction_findSomebody':
+			$title_img_src = $theme_path . '/img/takeaction/directory.png';
+			$title = t('Find Somebody');
+			$img = $theme_path . '/img/takeaction/directory.jpg';
+			$content = array(
+				'p1' => t('The campus directory has detailed contact information for students, faculty, and staff.'),
+				'p2' => l('Find what you\'re looking for', 'http://directory.uchicago.edu/'),
+			);
+			break;
+		case 'takeaction_beginJourney':
+			$title_img_src = $theme_path . '/img/takeaction/ies.png';
+			$title = t('Begin your Journey');
+			$img = $theme_path . '/img/takeaction/ies.jpg';
+			$content = array(
+				'p1' => t('"The days of dreaming are passed, and now the real action begins." -William Rainey Harper'),
+				'p2' => l('Read Information for Entering Students', 'http://college.uchicago.edu/newstudents'),
+			);
+			break;
+		case 'takeaction_checkCalendar':
+			$title_img_src = $theme_path . '/img/takeaction/academic_calendar.png';
+			$title = t('Check your Calendar');
+			$img = $theme_path . '/img/takeaction/academic_calendar.jpg';
+			$content = array(
+				'p1' => t('Making New Year\'s plans, going on a spring break trip, or looking forward to move-in?'),
+				'p2' => l('Consult the Academic Calendar', 'http://academic-calendar.uchicago.edu/'),
+			);
+			break;
+		case 'takeaction_gradSchool':
+			$title_img_src = $theme_path . '/img/takeaction/graduate_study.png';
+			$title = t('Go to Grad School');
+			$img = $theme_path . '/img/takeaction/graduate_study.jpg';
+			$content = array(
+				'p1' => t('The College Scholarships site helps you to answer the question, "Should I go to graduate school" as well as all of the questions that follow.'),
+				'p2' => l('Look into graduate school', 'https://frogs.uchicago.edu/fellowships/graduate_study.cfm'),
+			);
+			break;
+		case 'takeaction_inShape':
+			$title_img_src = $theme_path . '/img/takeaction/fitness.png';
+			$title = t('Keep yourself in Shape');
+			$img = $theme_path . '/img/takeaction/fitness.jpg';
+			$content = array(
+				'p1' => t('Find out all of the details of your fitness and swimming placement tests.'),
+				'p2' => t('Get ') . l('the packet (pdf)', 'http://athletics.uchicago.edu/physed/freshman-packet.pdf') . t(' and stay in shape.'),
+			);
+			break;
+		case 'takeaction_plansSummer':
+			$title_img_src = $theme_path . '/img/takeaction/summer_plans.png';
+			$title = t('Make plans for Summer');
+			$img = $theme_path . '/img/takeaction/summer_plans.jpg';
+			$links = array(
+				l('Study a Language or Conduct Research', 'http://sitg.uchicago.edu/'),
+				l('Get an Internship', 'https://caps.uchicago.edu/undergrads/internships/'),
+				l('Find a Summer Job', 'https://caps.uchicago.edu/undergrads/internships/'),
+				l('Study Abroad', 'http://study-abroad.uchicago.edu/programs/type.html#summer'),
+				l('Take a Class', 'academics-advising/course-selection-registration/summer-course-work'),
+				l('Venture to Adventure', 'https://venturetoadventure.uchicago.edu/'),
+				l('Volunteer', 'http://ucsc.uchicago.edu/'),
+				l('Work on Campus', 'http://studentemployment.uchicago.edu/'),
+			);
+			$content = array(
+				'p1' => '' . theme('item_list', $links, '', 'ul', array('class' => 'takeaction_list')),
+			);
+			break;
+		case 'takeaction_transcript':
+			$title_img_src = $theme_path . '/img/takeaction/cmore.png';
+			$title = t('Get your Transcript');
+			$img = $theme_path . '/img/takeaction/cmore.jpg';
+			$content = array(
+				'p1' => l('Connect to cMore', 'http://cmore.uchicago.edu') . t(' to view your Academic History or request an official transcript.'),
+				'p2' => t('Visit the advisers\' desk on the second floor of Harper to request an unofficial transcript.'),
+			);
+			break;
+		case 'takeaction_ferpaForm':
+			$title_img_src = $theme_path . '/img/takeaction/ferpa.png';
+			$title = t('Update your FERPA form');
+			$img = $theme_path . '/img/takeaction/ferpa.jpg';
+			$content = array(
+				'p1' => t('To make changes to your status, download the PDF and turn it into the Dean of Students in the College.'),
+				'p2' => l('FERPA Release for U.S. Citizens (PDF)', 'http://www.college.uchicago.edu/academics/pdf/FERPA_certification.pdf'),
+				'p3' => l('FERPA Release for International Students (PDF)', 'http://www.college.uchicago.edu/academics/pdf/FERPA_international.pdf'),
+			);
+			break;
+		case 'takeaction_researchWorld':
+			$title_img_src = $theme_path . '/img/takeaction/research.png';
+			$title = t('Research your World');
+			$img = $theme_path . '/img/takeaction/research.jpg';
+			$content = array(
+				'p1' => t('Opportunities for research both on campus and abroad are posted regularly.'),
+				'p2' => l('Find a research opportunity now', 'https://frogs.uchicago.edu/researchopportunities'),
+			);
+			break;
+		case 'takeaction_jointDegree':
+			$title_img_src = $theme_path . '/img/takeaction/joint_degree.png';
+			$title = t('Begin a Joint Degree');
+			$img = $theme_path . '/img/takeaction/joint_degree.jpg';
+			$content = array(
+				'p1' => t('Read about it in the College Catalog, then talk to the College Joint Degree Adviser about getting involved in one of these programs'),
+				'p2' => l('College Catalog: Joint Degree Programs (PDF)', 'http://collegecatalog.uchicago.edu/pdf_10/JDP.pdf'),
+				'p3' => l('Request an Appointment with Ron Gorny (Email)', 'mailto:rjl2@uchicago.edu'),
+			);
+			break;
+	}
+	
+	//build html for blocks
+	$title_img = $output = '<div class="takeActionInstance"><img class="takeActionHeaderImage" src="' . $title_img_src . '" alt="' . $title . '" /><h2 class="hide">' . $title . '</h2>';
+	$img = '<img class="takeActionImage"  src="' . $img . '" alt="' . $title . '" />';
+	$arrow = '<img class="takeActionIcon" src="' . $theme_path . '/img/arrowIcon.png" alt="Arrow" />';
+	$content_expanded = '<div class="takeActionText">';
+	foreach($content as $paragraph) {
+		$content_expanded .= '<p>' . $paragraph . '</p>';
+	}
+	$content_expanded .= '</div></div><!--takeActionInstance-->';
+	
+	$output = $title_img . $img . $arrow . $content_expanded;
+		
+	return $output;
+}
+
+function _uofc_study-abroad_college_features_content() {
+	$output = '<ul class="collegeFeatures">';
+	$output .= '<li class="aboutOurFeatures"><a href="' . base_path() . 'about-our-features"><span class="hide">' . t('About our features') . '</span></a></li>';
+	$output .= (arg(0) != 'archives') ? '<li class="viewFeatureArchives"><a href="' . base_path() . 'archives"><span class="hide">' . t('View feature archives') .'</span></a></li>' : '';
+	/*$output .= '<li class="submitAFeature"><a href="#"><span class="hide">' . t('Submit a feature of your own') . '</span></a></li>';*/
+	$output .= (arg(0) != 'archives') ? '<li class="shareThisFeatureRightSidebar"><a href="http://www.addthis.com/bookmark.php" onmouseover="return addthis_open(this, \'\', location.href, document.title)" onmouseout="addthis_close()" onclick="return addthis_sendto()"><span class="hide">' . t('Share this feature') . '</span></a><script type="text/javascript" src="http://s7.addthis.com/js/250/addthis_widget.js"></script></li>' : '';
+	//$output .= (arg(0) != 'archives') ? '<li class="shareThisFeature"><a class="addthis_button" href="http://www.addthis.com/bookmark.php?v=250&amp;pub=nsitwebservices"><span class="hide">' . t('Share this feature') . '</span></a><script type="text/javascript" src="http://s7.addthis.com/js/250/addthis_widget.js#pub=nsitwebservices"></script></li>' : '';
+	$output .= '</ul>';
+	
+	return $output;
+}
+
+function _uofc_study-abroad_college_now_content() {
+	$output = '<ul class="collegeNow">';
+	$output .= '<li class="aboutCollegeNow"><a href="' . base_path() . 'news/about"><span class="hide">' . t('About College Now') . '</span></a></li>';
+	$output .= '</ul>';
+	
+	return $output;
+}
+
+function _uofc_study-abroad_filter_feature_type_content() {
+	$output = '<ul class="filterFeatures">';
+	$output .= (arg(1)) ? '<li><a href="' . base_path() . 'archives">' . t('All') .'</a></li>' : '';
+	$output .= (arg(2)) ? '<li>' . l('Slideshow', 'archives/slideshow/' . check_plain(arg(2))) .'</a></li>' : '<li>' . l('Slideshow', 'archives/slideshow') .'</a></li>';
+	$output .= (arg(2)) ? '<li>' . l('Story', 'archives/story/' . check_plain(arg(2))) .'</a></li>' : '<li>' . l('Story', 'archives/story') . '</a></li>';
+	$output .= (arg(2)) ? '<li>' . l('Video', 'archives/video/' . check_plain(arg(2))) .'</a></li>' : '<li>' . l('Video', 'archives/video') . '</a></li>';
+	$output .= '</ul>';
+	
+	return $output;
+}
+
+function _uofc_study-abroad_browse_features_content() {
+	$output = '<ul class="browseFeatures"><li>' . l('View a list of tags to browse by topic, subject, etc.', 'tags') . '</li></ul>';
+	return $output;
+}
+
+function _uofc_study-abroad_planning_future_content() {
+	$links = array(
+		'<a href="#" class="law">... be a lawyer</a>',
+		'<a href="#" class="doc">... be a doctor</a>',
+		'<a href="#" class="journalist">... be a journalist</a>',
+		'<a href="#" class="biz">... be in business</a>',
+		'<a href="#" class="teach">... be a teacher</a>',
+		'<a href="#" class="job">... get a job</a>',
+		'<a href="#" class="grad">... go to grad school</a>',
+		'<a href="#" class="intern">... get an internship</a>',
+		'<a href="#" class="fellow">... get a fellowship</a>',
+		'<a href="#" class="opp">... find a research opportunity</a>',
+		'<a href="#" class="travel">... travel the world</a>',
+		'<a href="#" class="ma">... get a BA/MA</a>',
+		'<a href="#" class="alum">... connect with alumni</a>',
+	);
+	$output = '<p>I want to ...</p>' . theme('item_list', $links, NULL, 'ul', array('class' => 'menu'));
+	
+	return $output;	
+}
+
+function _uofc_study-abroad_planning_future_related_links_content() {
+	$related_links = array(
+		l('Study a Language or Conduct Research', 'http://sitg.uchicago.edu/'),
+		l('Get an Internship', 'https://caps.uchicago.edu/undergrads/internships/'),
+		l('Find a Summer Job', 'https://caps.uchicago.edu/undergrads/internships/'),
+		l('Study Abroad', 'http://study-abroad.uchicago.edu/programs/type.html#summer'),
+		l('Take a Class', 'academics-advising/course-selection-registration/summer-course-work'),
+		l('Venture to Adventure', 'https://venturetoadventure.uchicago.edu/'),
+		l('Volunteer', 'http://ucsc.uchicago.edu/'),
+		l('Work on Campus', 'http://studentemployment.uchicago.edu/'),
+	);
+	
+	$output = theme('item_list', $related_links, NULL, 'ul', array('class' => 'menu'));
+	
+	return $output;
+}
+
+function _uofc_study-abroad_flickr_photo_info($photo) {
+	// Create new phpFlickr object
+	$f = flickrapi_phpFlickr();
+	
+	$info = $f->photos_getInfo($photo['id']);
+	
+	return array(
+		'desc' => $info['description'],
+		'username' => $info['owner']['username'],
+		'realname' => $info['owner']['realname'],
+	);
+}
+
+function _uofc_study-abroad_form_alter_feature_node_form(&$form, $form_id) {
+	global $user;
+	$uid = $user->uid;
+	$role = array_pop($user->roles);
+	
+	switch($role) {
+		case 'supervisor':
+			//allow publishing
+			$form['options']['#access'] = TRUE;
+			$form['options']['promote']['#access'] = FALSE;
+			$form['options']['sticky']['#access'] = FALSE;
+			break;
+	}	
+}
+
+function _uofc_study-abroad_form_alter_contact_form(&$form, $form_id) {
+	$form['submit']['#value'] = 'Send email';
+}
+
+/**
+ * Return html list of flickr photos
+ *
+ * @param int $photoset
+ * @param int $num_photos
+ * @param string $img_size
+ * @param array $img_attrib
+ * @param array $list_attrib
+ * @return array
+ */
+function theme_uofc_study-abroad_flickr_html_list($photoset, $num_photos = 36, $img_size = 'medium', $list_attrib = NULL) {
+
+	// Create new phpFlickr object
+	$f = flickrapi_phpFlickr();
+	    
+	//get photoset
+	$photoset = $f->photosets_getPhotos($photoset);
+	
+	$images = array();
+	
+	//build image array
+	foreach ($photoset['photoset']['photo'] as $photo) {
+		$url = $f->buildPhotoURL($photo, $img_size);
+		$info = $f->photos_getInfo($photo['id']);
+		$images[] = '<img src="' . $url . '" title="'. $info['description'] . '" />';
+	}
+	
+	$output = theme('item_list', $images, NULL, 'ul', $list_attrib);
+	
+	return $output;
+}
+
+/**
+ * Implementation of hook_theme
+ */
+function uofc_study-abroad_theme() {
+	return array(
+		'uofc_study-abroad_flickr_html_list' => array(
+	        'arguments' => array(
+	            'photoset' => NULL,
+	            'num_photos' => 36,
+	            'image_size' => 'medium',
+	            'list_attrib'  => NULL,
+	        )
+	    ),
+	    'contact_mail_page' => array(
+	    	'arguments' => array(
+	    		'form' => NULL
+	    	),
+	    	'template' => 'contact-mail-page',
+	    ),
+	);
+}
+
+/**
+ * Number of uniquely chicago nodes
+ */
+function uniquely_chicago_count() {
+	$count = db_fetch_array(db_query("SELECT COUNT(ctu.nid) AS count FROM {content_type_uniquelychicago} ctu"));
+	return (int) $count['count'];
+}
